@@ -7,14 +7,14 @@
  */
 EC_KEY *ec_create(void)
 {
-	EC_KEY *key = NULL;					/* init new key */
+	EC_KEY *key = NULL;								/* init new key */
 
 	key = EC_KEY_new_by_curve_name(NID_secp256k1);	/* use secp256k1 */
 	if (!key)										/* to create key pair */
 		return (NULL);
 
 	if (!EC_KEY_generate_key(key) || !EC_KEY_check_key(key))
-	{
+	{												/* generate/verify key */
 		EC_KEY_free(key);
 		return (NULL);
 	}
