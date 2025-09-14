@@ -24,6 +24,19 @@
 #define PRI_FILENAME "key.pem"
 #define PUB_FILENAME "key_pub.pem"
 
+#define SIG_MAX_LEN 72
+
+/**
+ * struct sig_s -	structure to hold a signature
+ * @sig:			buffer to hold the signature
+ * @len:			length of the signature
+ */
+typedef struct sig_s
+{
+	uint8_t sig[SIG_MAX_LEN];
+	uint8_t len;
+} sig_t;
+
 uint8_t *sha256(
 	int8_t const *s, size_t len, uint8_t digest[SHA256_DIGEST_LENGTH]);
 EC_KEY *ec_create(
@@ -36,5 +49,7 @@ int ec_save(
 	EC_KEY *key, char const *folder);
 EC_KEY *ec_load(
 	char const *folder);
+uint8_t *ec_sign(
+	EC_KEY const *key, uint8_t const *msg, size_t msglen, sig_t *sig);
 
 #endif /* HBLK_CRYPTO_H */
