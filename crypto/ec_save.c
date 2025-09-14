@@ -1,5 +1,7 @@
 #include "hblk_crypto.h"
 #include <sys/stat.h>
+#include <dirent.h>
+#include <errno.h>
 #include <openssl/pem.h>
 
 /**
@@ -11,21 +13,14 @@
  */
 int ec_save(EC_KEY *key, char const *folder)
 {
-	struct stat folder_info;					/* folder metadata */
 	char priv_path[PATH_MAX], pub_path[PATH_MAX];	/* file paths */
 	FILE *priv_fp = NULL, *pub_fp = NULL;		/* file pointers */
 
 	if (!key || !folder)						/* check inputs */
 		return (0);
 
-	if (stat(folder, &folder_info) == -1)		/* if folder does not exist */
-	{
-		if (mkdir(folder, 0755) == -1)			/* create it */
-			return (0);
-	}
-	else if (!S_ISDIR(folder_info.st_mode))		/* exists but not directory */
+	if (mkdir(folder, 0755) == -1 && errno != EEXIST)	/* create folder */
 		return (0);
-
 												/* create file paths */
 	snprintf(priv_path, sizeof(priv_path), "%s/%s", folder, PRI_FILENAME);
 	snprintf(pub_path, sizeof(pub_path), "%s/%s", folder, PUB_FILENAME);
