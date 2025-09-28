@@ -1,5 +1,4 @@
 #include "blockchain.h"
-#include "provided/_genesis.c"
 
 /**
  * blockchain_create -	creates and initializes a blockchain
@@ -10,8 +9,11 @@
  */
 blockchain_t *blockchain_create(void)
 {
-	blockchain_t *blockchain;					/* new blockchain container */
-	block_t *genesis;							/* gen block representation */
+	blockchain_t *blockchain = NULL;			/* new blockchain container */
+	block_t *genesis = NULL;					/* gen block representation */
+	block_data_t gen_data = {"Holberton School", 16};	/* gen block data */
+	block_info_t gen_info = {0, 0, 1537578000, 0, {0}};		/* gen block info */
+
 
 	blockchain = malloc(sizeof(*blockchain));	/* allocate memory - chain */
 	if (!blockchain)
@@ -24,18 +26,20 @@ blockchain_t *blockchain_create(void)
 		return (NULL);
 	}
 
-	genesis = malloc(sizeof(*genesis));		/* allocate memory - genblk */
+	genesis = malloc(sizeof(*genesis));		/* allocate memory - gen block */
 	if (!genesis)
 	{
 		llist_destroy(blockchain->chain, 0, NULL);	/* must destroy list */
 		free(blockchain);							/* before freeing chain */
 		return (NULL);
 	}
-	memcpy(genesis, &_genesis, sizeof(*genesis));	/* copy genesis */
 
+	genesis->info = gen_info;						/* set genesis info */
+	genesis->data = gen_data;						/* set genesis data */
+	memcpy(genesis->hash, HLBTN_HASH, sizeof(genesis->hash)); /* copy genesis */
 	if (llist_add_node(blockchain->chain, genesis, ADD_NODE_REAR) != 0)
-	{
-		free(genesis);							/* add genesis block to chain */
+	{												/* add genesis to chain */
+		free(genesis);
 		llist_destroy(blockchain->chain, 0, NULL);
 		free(blockchain);
 		return (NULL);
