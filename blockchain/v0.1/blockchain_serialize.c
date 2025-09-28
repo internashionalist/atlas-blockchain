@@ -77,8 +77,8 @@ int blockchain_serialize(blockchain_t const *blockchain, char const *path)
 	if (!file)
 		return (-1);
 	endian = _get_endianness();					/* get system endianness */
-	swap = (endian == 2);							/* swap if big-endian */
-	if (!write_field(file, HBLK, 4, 0) ||
+	swap = (endian == 2);								/* set swap flag */
+	if (!write_field(file, HBLK, 4, 0) ||				/* write header */
 	    !write_field(file, VERS, 3, 0) ||
 	    !write_field(file, &endian, 1, 0) ||
 	    !write_field(file, &count, sizeof(count), swap))
