@@ -16,6 +16,11 @@
 	"\xc5\x2c\x26\xc8\xb5\x46\x16\x39\x63\x5d\x8e\xdf\x2a\x97\xd4\x8d\x0c" \
 	"\x8e\x00\x09\xc8\x17\xf2\xb1\xd3\xd7\xff\x2f\x04\x51\x58\x03"
 
+#define HBLK "\x48\x42\x4c\x4b"
+#define VERS "\x30\x2e\x31"
+#define IS_LITTLE_ENDIAN() (_get_endianness() == 1)
+#define IS_BIG_ENDIAN() (_get_endianness() == 2)
+
 /* BLOCKCHAIN STRUCTURES */
 
 /**
@@ -73,7 +78,16 @@ typedef struct blockchain_s
 	llist_t *chain;
 } blockchain_t;
 
-
+/**
+ * struct serialize_ctx -	context for serialization
+ * @stream:					file stream to write to
+ * @swap:					whether to swap endianness of fields
+ */
+struct serialize_ctx
+{
+	FILE *stream;
+	int swap;
+};
 
 /* FUNCTION PROTOTYPES */
 
