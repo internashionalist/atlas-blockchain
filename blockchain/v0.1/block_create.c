@@ -23,7 +23,7 @@ block_t *block_create(
 	{
 		block_info.index = prev->info.index + 1;	/* set new block position */
 		block_info.difficulty = prev->info.difficulty; /* copy difficulty */
-		block_info.timestamp = 1536715352;			/* set creation time */
+		block_info.timestamp = time(NULL);			/* set creation time */
 		memcpy(block_info.prev_hash, prev->hash,
 			sizeof(block_info.prev_hash));			/* copy previous hash */
 	}
