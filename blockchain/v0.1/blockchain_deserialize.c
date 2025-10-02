@@ -32,11 +32,11 @@ int read_field(FILE *file, void *buf, size_t size, int swap)
  */
 int read_block(FILE *file, block_t *block, int swap)
 {
-	uint32_t len;
+	uint32_t len;									/* data length */
 
-	if (!file || !block)
+	if (!file || !block)							/* check inputs */
 		return (0);
-	if (!read_field(file, &block->info.index,
+	if (!read_field(file, &block->info.index,		/* read block info */
 			sizeof(block->info.index), swap) ||
 	    !read_field(file, &block->info.difficulty,
 			sizeof(block->info.difficulty), swap) ||
@@ -46,17 +46,17 @@ int read_block(FILE *file, block_t *block, int swap)
 			sizeof(block->info.nonce), swap))
 		return (0);
 	if (fread(block->info.prev_hash, 1, SHA256_DIGEST_LENGTH, file) !=
-	    SHA256_DIGEST_LENGTH)
+	    SHA256_DIGEST_LENGTH)						/* read prev hash */
 		return (0);
 	if (!read_field(file, &block->data.len, sizeof(block->data.len), swap))
-		return (0);
+		return (0);									/* read data len */
 	len = block->data.len;
-	if (len > BLOCKCHAIN_DATA_MAX)
+	if (len > BLOCKCHAIN_DATA_MAX)					/* check data len */
 		return (0);
 	if (len && fread(block->data.buffer, 1, len, file) != len)
-		return (0);
+		return (0);									/* read data */
 	if (fread(block->hash, 1, SHA256_DIGEST_LENGTH, file) !=
-	    SHA256_DIGEST_LENGTH)
+	    SHA256_DIGEST_LENGTH)						/* read block hash */
 		return (0);
 	return (1);
 }
@@ -87,12 +87,12 @@ int read_header(FILE *file, uint32_t *count, int *swap)
 }
 
 /**
- * append_block -				reads next block from file
- *								and appends it to a blockchain
- * @file:						input stream
- * @blockchain:					blockchain container to append to
- * @swap:						swap flag
- * Return:						1 on success, otherwise 0
+ * append_block -			reads next block from file
+ *							and appends it to a blockchain
+ * @file:					input stream
+ * @blockchain:				blockchain container to append to
+ * @swap:					swap flag
+ * Return:					1 on success, otherwise 0
  */
 int append_block(FILE *file, blockchain_t *blockchain, int swap)
 {
@@ -116,11 +116,11 @@ int append_block(FILE *file, blockchain_t *blockchain, int swap)
 }
 
 /**
- * blockchain_deserialize -		reads a blockchain from a serialized file
- * @path:						file path to read from
+ * blockchain_deserialize -	reads a blockchain from a serialized file
+ * @path:					file path to read from
  *
- * Return:						pointer to blockchain on success
- *								otherwise NULL
+ * Return:					pointer to blockchain on success
+ *							otherwise NULL
  */
 blockchain_t *blockchain_deserialize(char const *path)
 {
