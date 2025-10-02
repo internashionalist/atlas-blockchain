@@ -1,5 +1,3 @@
-*.o
 *-test
 /key.pem
 /key-pub.pem
-*.so
