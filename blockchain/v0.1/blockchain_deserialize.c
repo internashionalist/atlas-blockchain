@@ -1,48 +1,146 @@
 #include "blockchain.h"
 
+int read_field(FILE *file, void *buf, size_t size, int swap);
+int read_block(FILE *file, block_t *block, int swap);
+int read_header(FILE *file, uint32_t *count, int *swap);
+int append_block(FILE *file, blockchain_t *blockchain, int swap);
+
 /**
- * blockchain_deserialize - load a blockchain from disk
- * @path: serialized file path
- * Return: pointer to blockchain on success, NULL otherwise
+ * read_field -				reads raw bytes from file and
+ *							swaps endianness if requested
+ * @file:					file stream to read from
+ * @buf:					pointer to data
+ * @size:					number of bytes to write
+ * @swap:					swap flag
+ * Return:					1 on success, 0 on failure
+ */
+int read_field(FILE *file, void *buf, size_t size, int swap)
+{
+	if (fread(buf, 1, size, file) != size)			/* read data */
+		return (0);
+	if (swap && size > 1)							/* if swap needed */
+		_swap_endian(buf, size);					/* swap endianness */
+	return (1);
+}
+
+/**
+ * read_block -	reads a single block from file
+ * @file:					input stream
+ * @block:					block pointer to fill
+ * @swap:					swap flag
+ * Return:					1 on success, otherwise 0
+ */
+int read_block(FILE *file, block_t *block, int swap)
+{
+	if (!file || !block)								/* check inputs */
+		return (0);
+
+	if (!read_field(file, &block->info.index,		/* read all block info */
+					sizeof(block->info.index), swap) ||
+		!read_field(file, &block->info.difficulty,
+					sizeof(block->info.difficulty), swap) ||
+		!read_field(file, &block->info.timestamp,
+					sizeof(block->info.timestamp), swap) ||
+		!read_field(file, &block->info.nonce,
+					sizeof(block->info.nonce), swap) ||
+		!read_field(file, &block->data.len,
+					sizeof(block->data.len), swap))
+		return (0);
+
+	return (1);
+}
+
+/**
+ * read_header -			reads and validates the serialized file header
+ * @file:					input stream
+ * @count:					block count
+ * @swap:					swap flag
+ * Return:					1 on success, otherwise 0
+ */
+int read_header(FILE *file, uint32_t *count, int *swap)
+{
+	uint8_t magic[4], version[3], endian;				/* header fields */
+
+	if (fread(magic, 1, sizeof(magic), file) != sizeof(magic) ||
+	    memcmp(magic, HBLK, sizeof(magic)) != 0 ||
+	    fread(version, 1, sizeof(version), file) != sizeof(version) ||
+	    memcmp(version, VERS, sizeof(version)) != 0 ||
+	    fread(&endian, 1, 1, file) != 1)				/* read header */
+		return (0);
+	if (endian != 1 && endian != 2)						/* check endianness */
+		return (0);
+	*swap = (_get_endianness() != endian);				/* set swap flag */
+	if (!read_field(file, count, sizeof(*count), *swap) || *count == 0)
+		return (0);										/* read block count */
+	return (1);
+}
+
+/**
+ * append_block -				reads next block from file
+ *								and appends it to a blockchain
+ * @file:						input stream
+ * @blockchain:					blockchain container to append to
+ * @swap:						swap flag
+ * Return:						1 on success, otherwise 0
+ */
+int append_block(FILE *file, blockchain_t *blockchain, int swap)
+{
+	block_t *block;										/* new block */
+
+	block = malloc(sizeof(*block));						/* mem for block */
+	if (!block)
+		return (0);
+	memset(block, 0, sizeof(*block));					/* clear block */
+	if (!read_block(file, block, swap))					/* read block info */
+	{
+		free(block);
+		return (0);
+	}
+	if (llist_add_node(blockchain->chain, block, ADD_NODE_REAR) == -1)
+	{													/* append to chain */
+		free(block);
+		return (0);
+	}
+	return (1);
+}
+
+/**
+ * blockchain_deserialize -		reads a blockchain from a serialized file
+ * @path:						file path to read from
+ *
+ * Return:						pointer to blockchain on success
+ *								otherwise NULL
  */
 blockchain_t *blockchain_deserialize(char const *path)
 {
-	FILE *file;													/* stream */
-	blockchain_t *blockchain = NULL;					/* blockchain rep */
-	block_t *block = NULL;									/* block rep */
-	uint8_t magic[4], version[3];							/* file header */
-	uint32_t count = 0, i;							/* block count, index */
+	FILE *file = NULL;									/* stream */
+	blockchain_t *blockchain = NULL;				/* blockchain container */
+	uint32_t count = 0, i;								/* count, index */
+	int swap;											/* swap flag */
 
-	if (!path)												/* path check */
+	if (!path)											/* check inputs */
 		return (NULL);
-	file = fopen(path, "read");						/* open file to read */
+	file = fopen(path, "rb");							/* open file */
 	if (!file)
 		return (NULL);
-	if (!fread(magic, 1, 4, file) || memcmp(magic, HBLK, 4) != 0 ||
-	    !fread(version, 1, 3, file) || memcmp(version, VERS, 3) != 0)
-		return (fclose(file), NULL);				/* read & check header */
 	blockchain = malloc(sizeof(*blockchain));		/* mem for blockchain */
 	if (!blockchain)
-		return (fclose(file), NULL);
-	blockchain->chain = llist_create(MT_SUPPORT_FALSE);
-	if (!blockchain->chain)						/* mem for blockchain list */
-		return (free(blockchain), fclose(file), NULL);
-	for (i = 0; i < 3; i++)					/* check version for each byte */
-		if (version[i] != VERS[i])
-			return (blockchain_destroy(blockchain), fclose(file), NULL);
-	for (fread(&count, sizeof(count), 1, file); i < count; i++)
-	{													/* read each block */
-		block = malloc(sizeof(*block));					/* mem for block */
-		if (!block)
-			return (blockchain_destroy(blockchain), fclose(file), NULL);
-		fread(&block->info, sizeof(block_info_t), 1, file);			/* info */
-		fread(&block->data.len, sizeof(block->data.len), 1, file);
-		if (block->data.len > BLOCKCHAIN_DATA_MAX)			/* check len */
-			block->data.len = BLOCKCHAIN_DATA_MAX;
-		fread(block->data.buffer, block->data.len, 1, file);		/* data */
-		fread(block->hash, SHA256_DIGEST_LENGTH, 1, file);			/* hash */
-		llist_add_node(blockchain->chain, block, ADD_NODE_REAR);  /* add it */
-	}
-	fclose(file);
-	return (blockchain);							/* return blockchain ptr */
+		goto fail;
+	memset(blockchain, 0, sizeof(*blockchain));			/* clear blockchain */
+	blockchain->chain = llist_create(MT_SUPPORT_FALSE);	/* create chain LL */
+	if (!blockchain->chain)
+		goto fail;
+	if (!read_header(file, &count, &swap))			/* read/validate header */
+		goto fail;
+	for (i = 0; i < count; i++)						/* read & append blocks */
+		if (!append_block(file, blockchain, swap))
+			goto fail;
+	fclose(file);										/* close up shop */
+	return (blockchain);						/* deserialized blockchain */
+fail:
+	if (file)
+		fclose(file);										/* GO TO JAIL */
+	if (blockchain)
+		blockchain_destroy(blockchain);
+	return (NULL);
 }
