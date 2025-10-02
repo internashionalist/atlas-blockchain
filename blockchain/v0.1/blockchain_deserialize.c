@@ -24,7 +24,7 @@ int read_field(FILE *file, void *buf, size_t size, int swap)
 }
 
 /**
- * read_block -	reads a single block from file
+ * read_block -				reads a single block from file
  * @file:					input stream
  * @block:					block pointer to fill
  * @swap:					swap flag
@@ -32,21 +32,32 @@ int read_field(FILE *file, void *buf, size_t size, int swap)
  */
 int read_block(FILE *file, block_t *block, int swap)
 {
-	if (!file || !block)								/* check inputs */
-		return (0);
+	uint32_t len;
 
-	if (!read_field(file, &block->info.index,		/* read all block info */
-					sizeof(block->info.index), swap) ||
-		!read_field(file, &block->info.difficulty,
-					sizeof(block->info.difficulty), swap) ||
-		!read_field(file, &block->info.timestamp,
-					sizeof(block->info.timestamp), swap) ||
-		!read_field(file, &block->info.nonce,
-					sizeof(block->info.nonce), swap) ||
-		!read_field(file, &block->data.len,
-					sizeof(block->data.len), swap))
+	if (!file || !block)
 		return (0);
-
+	if (!read_field(file, &block->info.index,
+			sizeof(block->info.index), swap) ||
+	    !read_field(file, &block->info.difficulty,
+			sizeof(block->info.difficulty), swap) ||
+	    !read_field(file, &block->info.timestamp,
+			sizeof(block->info.timestamp), swap) ||
+	    !read_field(file, &block->info.nonce,
+			sizeof(block->info.nonce), swap))
+		return (0);
+	if (fread(block->info.prev_hash, 1, SHA256_DIGEST_LENGTH, file) !=
+	    SHA256_DIGEST_LENGTH)
+		return (0);
+	if (!read_field(file, &block->data.len, sizeof(block->data.len), swap))
+		return (0);
+	len = block->data.len;
+	if (len > BLOCKCHAIN_DATA_MAX)
+		return (0);
+	if (len && fread(block->data.buffer, 1, len, file) != len)
+		return (0);
+	if (fread(block->hash, 1, SHA256_DIGEST_LENGTH, file) !=
+	    SHA256_DIGEST_LENGTH)
+		return (0);
 	return (1);
 }
 
@@ -123,14 +134,14 @@ blockchain_t *blockchain_deserialize(char const *path)
 	file = fopen(path, "rb");							/* open file */
 	if (!file)
 		return (NULL);
+	if (!read_header(file, &count, &swap))				/* read header */
+		goto fail;
 	blockchain = malloc(sizeof(*blockchain));		/* mem for blockchain */
 	if (!blockchain)
 		goto fail;
 	memset(blockchain, 0, sizeof(*blockchain));			/* clear blockchain */
-	blockchain->chain = llist_create(MT_SUPPORT_FALSE);	/* create chain LL */
+	blockchain->chain = llist_create(MT_SUPPORT_FALSE);	/* create ll */
 	if (!blockchain->chain)
-		goto fail;
-	if (!read_header(file, &count, &swap))			/* read/validate header */
 		goto fail;
 	for (i = 0; i < count; i++)						/* read & append blocks */
 		if (!append_block(file, blockchain, swap))
