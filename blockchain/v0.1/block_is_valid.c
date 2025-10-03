@@ -48,7 +48,7 @@ int block_is_valid(block_t const *block, block_t const *prev_block)
 	if (block->info.index == GENESIS_INDEX)			/* idx matches genesis */
 	{
 		if (genesis_checker(block) == 0)			/* and is valid genesis */
-			return (-1);
+			return (0);
 	}
 	else											/* not genesis block */
 	{
