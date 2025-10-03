@@ -21,6 +21,10 @@
 #define IS_LITTLE_ENDIAN() (_get_endianness() == 1)
 #define IS_BIG_ENDIAN() (_get_endianness() == 2)
 
+#define GENESIS_INDEX 0
+#define GENESIS_TIMESTAMP 1537578000
+#define GENESIS_DATA_LEN 16
+
 /* BLOCKCHAIN STRUCTURES */
 
 /**
