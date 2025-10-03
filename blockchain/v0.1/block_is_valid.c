@@ -32,7 +32,7 @@ int genesis_checker(block_t const *block)
  * block_is_valid -		validates a block against previous block
  * @block:				block to validate
  * @prev_block:			previous block in chain (NULL if genesis)
- * Return:				1 if block is valid, otherwise 0
+ * Return:				0 if block is valid, otherwise -1
  */
 int block_is_valid(block_t const *block, block_t const *prev_block)
 {
@@ -40,31 +40,33 @@ int block_is_valid(block_t const *block, block_t const *prev_block)
 	uint8_t prev_hash[SHA256_DIGEST_LENGTH];		/* previous block hash */
 
 	if (!block)										/* NULL block */
-		return (0);
+		return (-1);
 
 	if (block->data.len > BLOCKCHAIN_DATA_MAX)		/* data len too long */
-		return (0);
+		return (-1);
 
-	if (!prev_block)								/* no previous block */
+	if (block->info.index == GENESIS_INDEX)			/* idx matches genesis */
 	{
-		if (genesis_checker(block) == -1)			/* and not genesis */
-			return (0);
+		if (genesis_checker(block) == 0)			/* and is valid genesis */
+			return (-1);
 	}
-	else											/* prev block exists */
+	else											/* not genesis block */
 	{
-		if (block->info.index == GENESIS_INDEX ||	/* but not genesis */
-			block->info.index != prev_block->info.index + 1)
-			return (0);
+		if (!prev_block)							/* NULL prev block */
+			return (-1);
 
-		if (!block_hash(prev_block, prev_hash) ||
+		if (block->info.index != prev_block->info.index + 1)
+			return (-1);							/* invalid index */
+
+		if (!block_hash(prev_block, prev_hash) ||	/* invalid prev hash */
 			memcmp(prev_hash, prev_block->hash, SHA256_DIGEST_LENGTH) != 0 ||
 			memcmp(prev_hash, block->info.prev_hash, SHA256_DIGEST_LENGTH) != 0)
-			return (0);							/* or invalid prev hash */
+			return (-1);
 	}
 
 	if (!block_hash(block, hash) ||				/* invalid current block hash */
 		memcmp(hash, block->hash, SHA256_DIGEST_LENGTH) != 0)
-		return (0);
+		return (-1);
 
-	return (1);							/* if all checks out, block is valid */
+	return (0);							/* if all checks out, block is valid */
 }
