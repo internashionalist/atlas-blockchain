@@ -59,14 +59,19 @@ int block_is_valid(block_t const *block, block_t const *prev_block)
 			return (-1);							/* invalid index */
 
 		if (!block_hash(prev_block, prev_hash) ||	/* invalid prev hash */
-			memcmp(prev_hash, prev_block->hash, SHA256_DIGEST_LENGTH) != 0 ||
-			memcmp(prev_hash, block->info.prev_hash, SHA256_DIGEST_LENGTH) != 0)
+			memcmp(prev_hash, prev_block->hash,
+				SHA256_DIGEST_LENGTH) != 0 ||
+			memcmp(prev_hash, block->info.prev_hash,
+				SHA256_DIGEST_LENGTH) != 0)
 			return (-1);
 	}
 
-	if (!block_hash(block, hash) ||				/* invalid current block hash */
+	if (!block_hash(block, hash) ||					/* invalid curr hash */
 		memcmp(hash, block->hash, SHA256_DIGEST_LENGTH) != 0)
 		return (-1);
 
-	return (0);							/* if all checks out, block is valid */
+	if (!hash_matches_difficulty(block->hash, block->info.difficulty))
+		return (-1);								/* difficulty not met */
+
+	return (0);										/* block is valid */
 }
