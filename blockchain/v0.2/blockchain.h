@@ -17,7 +17,7 @@
 	"\x8e\x00\x09\xc8\x17\xf2\xb1\xd3\xd7\xff\x2f\x04\x51\x58\x03"
 
 #define HBLK "\x48\x42\x4c\x4b"
-#define VERS "\x30\x2e\x32"
+#define VERS "\x30\x2e\x32" /* updated for v0.2 */
 #define IS_LITTLE_ENDIAN() (_get_endianness() == 1)
 #define IS_BIG_ENDIAN() (_get_endianness() == 2)
 
@@ -27,6 +27,10 @@
 
 #define BLOCK_GENERATION_INTERVAL 1
 #define DIFFICULTY_ADJUSTMENT_INTERVAL 5
+#define EXPECTED_BLOCK_INTERVAL() \
+	(BLOCK_GENERATION_INTERVAL * DIFFICULTY_ADJUSTMENT_INTERVAL)
+#define ACTUAL_BLOCK_INTERVAL(x, y) \
+	(x->info.timestamp - y->info.timestamp)
 
 /* BLOCKCHAIN STRUCTURES */
 
