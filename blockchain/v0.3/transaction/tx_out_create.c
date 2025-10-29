@@ -10,21 +10,21 @@
  */
 tx_out_t *tx_out_create(uint32_t amount, uint8_t const pub[EC_PUB_LEN])
 {
-	tx_out_t *output;
+	tx_out_t *output;						/* new transaction output */
 
-	if (pub == NULL || amount == 0)
+	if (pub == NULL || amount == 0)			/* validate inputs */
 		return (NULL);
-	output = malloc(sizeof(*output));
+	output = malloc(sizeof(*output));		/* allocate memory */
 	if (!output)
 		return (NULL);
-	memset(output, 0, sizeof(*output));
-	output->amount = amount;
-	memcpy(output->pub, pub, EC_PUB_LEN);
+	memset(output, 0, sizeof(*output));		/* initialize memory */
+	output->amount = amount;				/* set amount */
+	memcpy(output->pub, pub, EC_PUB_LEN);	/* set recipient pub key */
 	if (!SHA256(
 		(uint8_t *)output, sizeof(uint32_t) + EC_PUB_LEN, output->hash))
 	{
-		free(output);
+		free(output);						/* compute hash*/
 		return (NULL);
 	}
-	return (output);
+	return (output);						/* return new tx output */
 }
