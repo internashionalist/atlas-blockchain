@@ -7,6 +7,7 @@
 #include <openssl/sha.h>
 #include <llist.h>
 
+#include "blockchain.h"
 #include "hblk_crypto.h"
 
 /**
