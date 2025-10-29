@@ -7,7 +7,7 @@
 #include <openssl/sha.h>
 #include <llist.h>
 
-#include "../../crypto/hblk_crypto.h"
+#include "hblk_crypto.h"
 
 /**
  * struct tx_out_s -			transaction output

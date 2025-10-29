@@ -10,7 +10,7 @@
 #include <openssl/sha.h>
 
 #include "provided/endianness.h"
-#include "v0.3/transaction/transaction.h"
+#include "transaction/transaction.h"
 
 #define BLOCKCHAIN_DATA_MAX	1024
 #define HLBTN_HASH \
