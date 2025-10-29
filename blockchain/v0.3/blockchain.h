@@ -70,24 +70,28 @@ typedef struct block_data_s
 
 /**
  * struct block_s -			represents a block in the blockchain
- * @info:					block metadata (from block_info_s)
- * @data:					block payload (data length <= BLOCKCHAIN_DATA_MAX)
- * @hash:					block hash (SHA256 of info + data)
+ * @info:					block metadata
+ * @data:					block payload
+ * @transactions:			list of transactions contained in the block
+ * @hash:					block hash
  */
 typedef struct block_s
 {
 	block_info_t info;
 	block_data_t data;
+	llist_t *transactions;
 	uint8_t hash[SHA256_DIGEST_LENGTH];
 } block_t;
 
 /**
  * struct blockchain_s -	container for the blockchain itself
  * @chain:					linked list of all blocks
+ * @unspent:				list of all unspent transaction outputs
  */
 typedef struct blockchain_s
 {
 	llist_t *chain;
+	llist_t *unspent;
 } blockchain_t;
 
 /**
