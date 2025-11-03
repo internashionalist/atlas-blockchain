@@ -51,13 +51,7 @@ blockchain_t *blockchain_create(void)
 	}
 	genesis->info = gen_info;						/* set genesis info */
 	genesis->data = gen_data;						/* set genesis data */
-	genesis->transactions = llist_create(MT_SUPPORT_FALSE); /* init tx list */
-	if (!genesis->transactions)
-	{
-		free(genesis);
-		blockchain_cleanup(blockchain);
-		return (NULL);
-	}
+	genesis->transactions = NULL;					/* no transactions yet */
 	memcpy(genesis->hash, HLBTN_HASH, sizeof(genesis->hash)); /* copy genesis */
 	if (llist_add_node(blockchain->chain, genesis, ADD_NODE_REAR) != 0)
 	{												/* add genesis to chain */
