@@ -6,10 +6,14 @@
  *
  * Return:				void
  */
-void block_destroy(block_t *block)
+void block_destroy(
+	block_t *block)
 {
-	if (!block)
+	if (!block)								/* null block */
 		return;
-	free(block);
-	block = NULL;
+	if (block->transactions)				/* free transactions list */
+		llist_destroy(
+			block->transactions, 1, (node_dtor_t)transaction_destroy);
+	free(block);							/* free block */
+	block = NULL;							/* nullify block */
 }

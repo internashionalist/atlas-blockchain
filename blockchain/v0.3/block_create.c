@@ -38,6 +38,12 @@ block_t *block_create(
 
 	block->info = block_info;						/* set new block info */
 	block->data = block_data;						/* set new block data */
+	block->transactions = llist_create(MT_SUPPORT_FALSE); /* init tx list */
+	if (!block->transactions)
+	{
+		free(block);
+		return (NULL);
+	}
 	memset(block->hash, 0, sizeof(block->hash));	/* zero new block hash */
 
 	return (block);									/* ptr to new block rep */
