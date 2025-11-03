@@ -35,11 +35,9 @@ transaction_t *coinbase_create(
 												/* set input values */
     memcpy(input->tx_out_hash, &block_index, sizeof(block_index));
 												/* add input to transaction */
-    if (!llist_add_node(transaction->inputs, input, ADD_NODE_REAR))
-    {
-        free(input);
+    if (llist_add_node(transaction->inputs, input, ADD_NODE_REAR) == -1)
         goto fail;
-    }
+		input = NULL;							/* reset */
 
     if (!ec_to_pub(receiver, receiver_pub))		/* get receiver public key */
         goto fail;
@@ -48,25 +46,25 @@ transaction_t *coinbase_create(
     if (!output)
         goto fail;
 												/* add output to transaction */
-    if (!llist_add_node(transaction->outputs, output, ADD_NODE_REAR))
-    {
-        free(output);
+    if (llist_add_node(transaction->outputs, output, ADD_NODE_REAR) == -1)
         goto fail;
-    }
+		output = NULL;							/* reset */
 												/* compute transaction hash */
     if (!transaction_hash(transaction, transaction->id))
         goto fail;
 
     return (transaction);						/* successful tx creation */
 
-fail:											/* fail cleanup*/
-    if (transaction)
-    {
-        if (transaction->inputs)
-            llist_destroy(transaction->inputs, 1, free);
-        if (transaction->outputs)
-            llist_destroy(transaction->outputs, 1, free);
-        free(transaction);
-    }
-    return (NULL);
+fail:
+	if (input)
+		free(input);
+	if (output)
+		free(output);
+	if (transaction)
+	{
+		llist_destroy(transaction->inputs, 1, NULL);
+		llist_destroy(transaction->outputs, 1, NULL);
+		free(transaction);
+	}
+	return (NULL);
 }
