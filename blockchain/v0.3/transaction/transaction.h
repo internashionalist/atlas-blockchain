@@ -10,6 +10,8 @@
 
 #include "hblk_crypto.h"
 
+#define COINBASE_AMOUNT 50
+
 /**
  * struct tx_out_s -			transaction output
  * @amount:						amount transferred
