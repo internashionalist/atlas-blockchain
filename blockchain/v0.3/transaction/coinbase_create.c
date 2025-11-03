@@ -37,7 +37,7 @@ transaction_t *coinbase_create(
 												/* add input to transaction */
 	if (llist_add_node(transaction->inputs, input, ADD_NODE_REAR) == -1)
 		goto fail;
-		input = NULL;							/* reset */
+	input = NULL;							/* reset */
 
 	if (!ec_to_pub(receiver, receiver_pub))		/* get receiver public key */
 		goto fail;
@@ -48,7 +48,7 @@ transaction_t *coinbase_create(
 												/* add output to transaction */
 	if (llist_add_node(transaction->outputs, output, ADD_NODE_REAR) == -1)
 		goto fail;
-		output = NULL;							/* reset */
+	output = NULL;							/* reset */
 												/* compute transaction hash */
 	if (!transaction_hash(transaction, transaction->id))
 		goto fail;
