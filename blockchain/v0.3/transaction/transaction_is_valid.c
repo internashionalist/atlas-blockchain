@@ -1,5 +1,16 @@
 #include "transaction.h"
 
+unspent_tx_out_t *find_matching_unspent(
+	llist_t *all_unspent,
+	tx_in_t const *tx_input);
+int process_inputs(
+	transaction_t const *transaction,
+	llist_t *all_unspent,
+	uint64_t *total_in);
+int process_outputs(
+	transaction_t const *transaction,
+	uint64_t *total_out);
+
 /**
 * find_matching_unspent -		finds matching unspent tx output for an input
 * @all_unspent:					list of all current unspent transaction outputs
@@ -8,7 +19,7 @@
 * Return:						pointer to matching unspent output
 *								or NULL on failure/not found
 */
-static unspent_tx_out_t *find_matching_unspent(
+unspent_tx_out_t *find_matching_unspent(
 	llist_t *all_unspent,
 	tx_in_t const *tx_input)
 {
@@ -48,7 +59,7 @@ static unspent_tx_out_t *find_matching_unspent(
 *
 * Return:						1 on success, 0 on failure
 */
-static int process_inputs(
+int process_inputs(
 	transaction_t const *transaction,
 
 	llist_t *all_unspent,
@@ -100,7 +111,7 @@ static int process_inputs(
 *
 * Return:						1 on success, 0 on failure
 */
-static int process_outputs(
+int process_outputs(
 	transaction_t const *transaction,
 	uint64_t *total_out)
 {

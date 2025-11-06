@@ -1,7 +1,16 @@
 #include "blockchain.h"
 
-int write_field(FILE *file, void const *buf, size_t size, int swap);
-int write_block(FILE *file, block_t const *block, uint32_t len, int swap);
+int write_field(
+	FILE * file,
+	void const *buf,
+	size_t size,
+	int swap);
+
+int write_block(
+	FILE * file,
+	block_t const *block,
+	uint32_t len,
+	int swap);
 
 /**
  * write_field -			writes raw bytes to file and

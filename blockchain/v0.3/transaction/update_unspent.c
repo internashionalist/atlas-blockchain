@@ -1,5 +1,17 @@
 #include "transaction.h"
 
+int is_it_spent(
+	unspent_tx_out_t const *unspent,
+	llist_t *txs);
+int append_outputs(
+	llist_t *txs,
+	uint8_t block_hash[SHA256_DIGEST_LENGTH],
+	llist_t *updated);
+int append_existing_unspent(
+	llist_t *all_unspent,
+	llist_t *transactions,
+	llist_t *updated);
+
 /**
  * is_it_spent -	checks if an unspent transaction output is spent
  * @unspent:		unspent transaction output to check
@@ -7,7 +19,7 @@
  *
  * Return:			1 if spent, 0 if not, -1 on failure
  */
-static int is_it_spent(
+int is_it_spent(
 	unspent_tx_out_t const *unspent,
 	llist_t *txs)
 {
@@ -57,7 +69,7 @@ static int is_it_spent(
  *
  * Return:						0 on success, -1 on failure
  */
-static int append_outputs(
+int append_outputs(
 	llist_t *txs,
 	uint8_t block_hash[SHA256_DIGEST_LENGTH],
 	llist_t *updated)
@@ -110,7 +122,7 @@ static int append_outputs(
  *
  * Return:						0 on success, -1 on failure
  */
-static int append_existing_unspent(
+int append_existing_unspent(
 	llist_t *all_unspent,
 	llist_t *transactions,
 	llist_t *updated)

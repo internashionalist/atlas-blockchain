@@ -1,5 +1,9 @@
 #include "transaction.h"
 
+unspent_tx_out_t *find_unspent_match(
+	llist_t *all_unspent,
+	tx_in_t const *tx_input);
+
 /**
  * find_unspent_match -		finds matching unspent tx output for an input
  * @all_unspent:			list of all current unspent transaction outputs
@@ -8,7 +12,7 @@
  * Return:					pointer to matching unspent output
  *							or NULL on failure/not found
  */
-static unspent_tx_out_t *find_unspent_match(
+unspent_tx_out_t *find_unspent_match(
 	llist_t *all_unspent,
 	tx_in_t const *tx_input)
 {
