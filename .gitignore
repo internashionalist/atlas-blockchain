@@ -1,3 +1,4 @@
 *-test
 /key.pem
 /key-pub.pem
+*.o

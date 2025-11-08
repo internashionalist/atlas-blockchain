@@ -1,26 +1,42 @@
-CC      ?= gcc
-AR      ?= ar
-ARFLAGS ?= rcs
-RM      ?= rm -f
+CC      := gcc
 
-WARN    := -Wall -Wextra -Werror -pedantic -Wno-deprecated-declarations
-INCS    := -I. -Itransaction -I../../crypto
-LIBDIRS := -L../../crypto
-LIBS    := -lhblk_crypto -lllist -lssl -lcrypto
+CFLAGS  := -Wall -Wextra -Werror -pedantic -Wno-deprecated-declarations \
+           -I. -Itransaction -I../../crypto
 
-SRCS    := $(wildcard *.c) $(wildcard transaction/*.c)
-OBJS    := $(patsubst %.c,%.o,$(notdir $(SRCS)))
+SRCS    := blockchain_create.c \
+           block_create.c \
+           block_destroy.c \
+           blockchain_destroy.c \
+           block_hash.c \
+           blockchain_serialize.c \
+           blockchain_deserialize.c \
+           block_is_valid.c \
+           hash_matches_difficulty.c \
+           blockchain_difficulty.c \
+           block_mine.c \
+           transaction/tx_out_create.c \
+           transaction/unspent_tx_out_create.c \
+           transaction/tx_in_create.c \
+           transaction/transaction_hash.c \
+           transaction/tx_in_sign.c \
+           transaction/transaction_create.c \
+           transaction/transaction_is_valid.c \
+           transaction/coinbase_create.c \
+           transaction/coinbase_is_valid.c \
+           transaction/transaction_destroy.c \
+           transaction/update_unspent.c
 
-vpath %.c . transaction
+OBJS    := $(SRCS:.c=.o)
 
 .PHONY: all clean
-all: libhblk_blockchain.a clean
 
-%.o: %.c
-	@$(CC) $(WARN) -c $(INCS) $(LIBDIRS) $(LIBS) $< -o $@
+all: libhblk_blockchain.a
 
 libhblk_blockchain.a: $(OBJS)
-	@$(AR) $(ARFLAGS) $@ $^
+	ar rcs $@ $(OBJS)
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	@$(RM) *.o
+	rm -f $(OBJS) libhblk_blockchain.a
