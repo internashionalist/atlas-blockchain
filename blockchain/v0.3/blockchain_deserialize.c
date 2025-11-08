@@ -25,7 +25,7 @@ static int read_field(
 {
 	if (!file || !buf || !size)						/* check inputs */
 		return (0);
-	if (!(fread(buf, 1, size, file) != size))		/* read bytes */
+	if (fread(buf, 1, size, file) != size)			/* read bytes */
 		return (0);
 	if (swap && size > 1)							/* swap if needed */
 		_swap_endian(buf, size);
