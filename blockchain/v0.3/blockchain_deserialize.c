@@ -211,6 +211,7 @@ blockchain_t *blockchain_deserialize(
 				SHA256_DIGEST_LENGTH ||				/* add to list */
 			llist_add_node(blockchain->unspent, entry, ADD_NODE_REAR) == -1)
 			return (free(entry), fclose(file), blockchain_destroy(blockchain), NULL);
+	}
 	fclose(file);
 	return (blockchain);							/* return rebuilt blockchain */
 }
